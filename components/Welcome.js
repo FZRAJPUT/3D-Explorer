@@ -1,47 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
-  LinearGradient,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient'; // Correct import
+import { useNavigation } from '@react-navigation/native';
 
-const WelcomeScreen = ({ navigation }) => {
-  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
-
-  useEffect(() => {
-    const checkFirstLaunch = async () => {
-      const isFirstLaunchStored = await AsyncStorage.getItem('isFirstLaunch');
-      if (isFirstLaunchStored === null) {
-        setIsFirstLaunch(true);
-      } else {
-        setIsFirstLaunch(false);
-      }
-    };
-
-    checkFirstLaunch();
-  }, []);
-
-  const handleGetStarted = async () => {
-    await AsyncStorage.setItem('isFirstLaunch', 'false');
-    navigation.replace('Home');
-  };
-
-  if (isFirstLaunch === null || !isFirstLaunch) {
-    return null;
-  }
+const WelcomeScreen = () => {
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{
-          uri: 'https://images.unsplash.com/photo-1562158073-ae6f73a5e23c?auto=format&fit=crop&w=800&q=60',
-        }}
-        style={styles.backgroundImage}
-      >
         <LinearGradient
           colors={['#00000070', '#000000d0']}
           style={styles.gradientOverlay}
@@ -50,12 +22,14 @@ const WelcomeScreen = ({ navigation }) => {
           <Text style={styles.description}>
             Dive into immersive navigation and explore the world in 3D like never before.
           </Text>
-          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Main')}
+          >
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
           <Text style={styles.footer}>Developed by THE SMART MOVE</Text>
         </LinearGradient>
-      </ImageBackground>
     </View>
   );
 };
@@ -63,10 +37,6 @@ const WelcomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
   },
   gradientOverlay: {
     flex: 1,
@@ -92,11 +62,11 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
   button: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#4B70F5',
     paddingVertical: 15,
     paddingHorizontal: 50,
     borderRadius: 30,
-    shadowColor: '#FF3B30',
+    shadowColor: '#4B70F5',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.5,
     shadowRadius: 10,

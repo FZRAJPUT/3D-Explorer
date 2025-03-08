@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { WebView } from 'react-native-webview';
+import React, { useState, useEffect } from "react";
+import { WebView } from "react-native-webview";
 import {
   StyleSheet,
   View,
@@ -7,34 +7,48 @@ import {
   TouchableOpacity,
   Text,
   ToastAndroid,
-} from 'react-native';
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import Loader from "../components/Loader";
+// import { MY_API_KEY } from '@env';
 
 const Home = () => {
-  const [searchText, setSearchText] = useState('bathinda');
-  const [mapId, setMapId] = useState('');
+  const [searchText, setSearchText] = useState();
+  const [mapId, setMapId] = useState("");
+
+  useEffect(() => {
+    getMap("bathinda");
+  }, []);
+
+  // school mall warehouse airport bathinda
 
   const getMap = async (city) => {
     try {
-      const response = await fetch(`https://threed-explorer.onrender.com/api/map/list?place=${city}`);
+      const response = await fetch(
+        `${process.env.MY_API_KEY}${city}`
+      );
       const data = await response.json();
       if (!data.success || !data.maps || data.maps.length === 0) {
-        ToastAndroid.show('No map available!', ToastAndroid.LONG);
+        ToastAndroid.show("No map available!", ToastAndroid.LONG);
         return;
       }
       setMapId(data.maps[0].mapId);
     } catch (error) {
       console.error("Error fetching data:", error);
-      ToastAndroid.show('Failed to fetch the map. Try again!', ToastAndroid.LONG);
+      ToastAndroid.show(
+        "Failed to fetch the map. Try again!",
+        ToastAndroid.LONG
+      );
     }
   };
 
   const handleSearch = () => {
-    if (searchText.trim() === '') {
-      ToastAndroid.show('Please enter a city name!', ToastAndroid.SHORT);
+    if (searchText.trim() === "") {
+      ToastAndroid.show("Please enter a city name!", ToastAndroid.SHORT);
       return;
     }
-
     getMap(searchText.trim().toLowerCase());
+    setSearchText("")
   };
 
   const htmlCode = `
@@ -46,7 +60,7 @@ const Home = () => {
           href="https://cdn.jsdelivr.net/npm/@mappedin/mappedin-js@6.0.1-alpha.4/lib/index.css"
           rel="stylesheet"
         />
-        <title>Mappedin Web SDK v6 Getting Started with JSDelivr</title>
+        <title>Mappedin Web SDK</title>
       </head>
       <body>
         <iframe 
@@ -64,82 +78,112 @@ const Home = () => {
   `;
 
   return (
-    <View style={styles.container}>
-      {/* Search Bar */}
+    <LinearGradient
+      colors={["#00000070", "#000000d0"]}
+      style={styles.gradientOverlay}
+    >
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search for a place..."
+          placeholder="Enter a city..."
+          placeholderTextColor="#ddd"
           value={searchText}
           onChangeText={setSearchText}
-          onSubmitEditing={handleSearch()}
           returnKeyType="search"
         />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch()}>
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
       </View>
 
       {/* Map */}
-      {mapId ? (
-        <WebView
-          source={{ html: htmlCode }}
-          style={styles.web}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-        />
-      ) : (
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderText}>Loading map....</Text>
-        </View>
-      )}
-    </View>
+      <View style={styles.mapContainer}>
+        {mapId ? (
+          <WebView
+            source={{ html: htmlCode }}
+            style={styles.web}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        ) : (
+          <View style={styles.placeholder}>
+            <Loader />
+          </View>
+        )}
+      </View>
+
+      {/* Footer */}
+      <Text style={styles.footer}>Developed by THE SMART MOVE</Text>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  gradientOverlay: {
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 30,
   },
   searchContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#f8f8f8',
-    alignItems: 'center',
+    flexDirection: "row",
+    width: "98%",
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 10,
+    elevation: 5,
   },
   searchInput: {
     flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    backgroundColor: '#fff',
+    fontSize: 16,
+    color: "#333",
   },
   searchButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#006BFF",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 30,
   },
   searchButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+  },
+  mapContainer: {
+    flex: 1,
+    width: "100%",
+    borderTopStartRadius: 15,
+    borderTopEndRadius: 15,
+    overflow: "hidden",
+    backgroundColor: "#000",
   },
   web: {
     flex: 1,
   },
   placeholder: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
   placeholderText: {
     fontSize: 18,
-    color: '#aaa',
+    color: "#ddd",
+    textAlign: "center",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    fontSize: 14,
+    color: "#fff",
+    textAlign: "center",
+    opacity: 0.8,
   },
 });
 
